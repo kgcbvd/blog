@@ -1,0 +1,2 @@
+# blog
+Django blog
