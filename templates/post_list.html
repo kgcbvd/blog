@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
+
 <h1>{{ title }} is working!</h1>
+<p>Parent page</p>
 {% for obj in object_list %}
 {% url "posts:detail" id=obj.id %}
 <a href='{{ obj.get_absolute_url }}'>{{ obj.title }}</a><br/>
@@ -15,5 +13,5 @@
 {{ obj.id }}<br/>
 
 {% endfor %}
-</body>
-</html>
+
+{% endblock content %}
