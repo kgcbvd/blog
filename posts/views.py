@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404, redirect
+from django.utils import timezone
 
 from .forms import PostForm
 from .models import Post
@@ -27,6 +28,9 @@ def post_create(request):
 
 def post_detail(request, slug=None):
     instance = get_object_or_404(Post, slug=slug)
+    if instance.publish > timezone.now().date() or instance.draft:
+        if not request.user.is_staff or not request.user.is_superuser:
+            raise Http404
     context = {
         "title": instance.title,
         "instance": instance,
@@ -34,7 +38,10 @@ def post_detail(request, slug=None):
     return render(request, "post_detail.html", context)
 
 def post_list(request):
-    queryset_list = Post.objects.all()
+    today = timezone.now().date()
+    queryset_list = Post.objects.active()
+    if request.user.is_staff or request.user.is_superuser:
+        queryset_list = Post.objects.all()
     paginator = Paginator(queryset_list, 10)
     page = request.GET.get('page')
     try:
@@ -46,7 +53,8 @@ def post_list(request):
 
     context = {
         "object_list": queryset,
-        "title": "List"
+        "title": "List",
+        "today": today,
     }
     return render(request, "post_list.html", context)
 
